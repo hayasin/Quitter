@@ -1,6 +1,7 @@
 // lib/services/auth_service.dart
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:postgrest/postgrest.dart' show CountOption; // ← to expose CountOption
+import 'package:postgrest/postgrest.dart'
+    show CountOption; // ← to expose CountOption
 
 final supabase = Supabase.instance.client;
 
@@ -97,4 +98,40 @@ Future<DateTime?> getLastHitTime() async {
 
   final ts = resp?['created_at'] as String?;
   return ts == null ? null : DateTime.parse(ts);
+}
+
+Future<List<int>> getWeeklyHitCounts() async {
+  final user = supabase.auth.currentUser;
+  if (user == null) throw Exception('No user logged in');
+
+  final now = DateTime.now().toUtc();
+  // final startOfToday = DateTime.utc(now.year, now.month, now.day);
+  //Found sunday of the week
+  final subtractVal = now.weekday % 7;
+  final startofWeek = DateTime.utc(
+    now.year,
+    now.month,
+    now.day,
+  ).subtract(Duration(days: subtractVal));
+
+  List<int> dailyCounts = [];
+
+  for (int i = 0; i <= 6; i++) {
+    final dayStart = startofWeek.add(Duration(days: i));
+    final dayEnd = dayStart.add(const Duration(days: 1));
+
+    //TODO: Fill in days from startofWeek all the way to Saturday. So for loop should increment 7 times?
+    final response = await supabase
+        .from('vape_hits')
+        .select()
+        .eq('user_id', user.id)
+        .gte('created_at', dayStart.toIso8601String())
+        .lt('created_at', dayEnd.toIso8601String());
+
+    dailyCounts.add(response.length); // Insert at start
+  }
+
+  print("HERE IS DAILY COUNTS:");
+  print(dailyCounts);
+  return dailyCounts;
 }
