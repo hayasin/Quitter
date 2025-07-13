@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:quitter/assets/colors.dart';
-import 'package:quitter/pages/graph_page.dart';
+import 'package:quitter/components/powerup.dart';
 import 'package:quitter/services/auth_service.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -36,8 +35,14 @@ class _HomePageState extends State<HomePage> {
 
   void _loadInitialData() async {
     try {
-      final count = await getTodaysHitCount();
-      final lastHit = await getLastHitTime();
+      final user = supabase.auth.currentUser;
+      if (user == null) {
+        print("No user logged in");
+        return;
+      }
+
+      final count = await getTodaysHitCount(user.id);
+      final lastHit = await getLastHitTime(user.id);
 
       setState(() {
         hitCount = count;
@@ -64,9 +69,14 @@ class _HomePageState extends State<HomePage> {
     try {
       await logVapeHitToSupabase();
 
-      // Refresh data
-      final count = await getTodaysHitCount();
-      final lastHit = await getLastHitTime();
+      final user = supabase.auth.currentUser;
+      if (user == null) {
+        print("No user logged in");
+        return;
+      }
+
+      final count = await getTodaysHitCount(user.id);
+      final lastHit = await getLastHitTime(user.id);
 
       setState(() {
         hitCount = count;
@@ -95,6 +105,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Center(
+      child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
@@ -125,7 +136,6 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 8),
 
-              // 📝 Motivational Subtext
               const Text(
                 "hits logged today",
                 style: TextStyle(
@@ -136,7 +146,6 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 24),
 
-              // ⏱️ Time Since Last Hit
               Text(
                 _formatDuration(timeSinceLastHit),
                 style: TextStyle(
@@ -155,7 +164,6 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 32),
 
-              // 🚀 Upgraded Button
               ElevatedButton(
                 onPressed: _logVapeHit,
                 style: ElevatedButton.styleFrom(
@@ -189,10 +197,33 @@ class _HomePageState extends State<HomePage> {
                 ),
                 textAlign: TextAlign.center,
               ),
+
+              const SizedBox(height: 60), // Add breathing space before runes
+              // 🔥 Your Power-Ups Section
+              Text(
+                "Your Power-Ups",
+                style: TextStyle(
+                  fontSize: 24,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              GridView.count(
+                crossAxisCount: 3,
+                shrinkWrap: true, 
+                physics: NeverScrollableScrollPhysics(), 
+
+                children: [
+                  PowerUp(imagePath: "assets/images/vitalsparks.svg", title: "Vital Spark"),
+                ]
+              )
+
             ],
           ),
         ),
-      );
-
+      ),
+    );
   }
 }

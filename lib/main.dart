@@ -25,9 +25,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Quitter',
       theme: ThemeData.dark(), 
-      home: const AuthPage(),  
+      home: const RootPage(),  
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:quitter/Assets/colors.dart';
 import 'package:quitter/pages/graph_page.dart';
 import 'package:quitter/pages/home_page.dart';
+import 'package:quitter/pages/friend_progress_page.dart';
 // import 'package:quitter/pages/settings_page.dart'; // <-- future settings page
 
 class RootPage extends StatefulWidget {
@@ -19,7 +20,9 @@ class _RootPageState extends State<RootPage> {
   // List of pages (you can replace with your real pages)
   final List<Widget> _pages = const [
     HomePage(),
-    GraphPage(), // <-- renamed GraphPage to BarPage for clarity
+    GraphPage(),
+    FriendProgressPage(), 
+    Center(child: Text("Secret Page :)", style: TextStyle(color: Colors.white, fontSize: 24)),), 
     Center(
       child: Text(
         "Settings Page",
@@ -41,6 +44,8 @@ class _RootPageState extends State<RootPage> {
         items: const [
           Icon(Icons.home, size: 30),
           Icon(Icons.bar_chart, size: 30),
+          Icon(Icons.emoji_events, size: 30),
+          Icon(Icons.savings, size: 30), 
           Icon(Icons.settings, size: 30),
         ],
         onTap: (index) {
